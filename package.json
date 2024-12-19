@@ -4,7 +4,10 @@
   "description": "APIRest de enpatados con buenas practicas y orientado a POO",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node build/main.js",
+    "start:dev": "tsc && concurrently \"tsc -w\" \"nodemon build/main.js\"",
+    "start_prod": "SET NODE_ENV=production && npm start"
   },
   "author": "Leandro Eraso",
   "license": "ISC",
@@ -24,5 +27,10 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "sequelize": "^6.37.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.9"
   }
 }
