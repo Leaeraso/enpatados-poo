@@ -11,7 +11,7 @@ class CategoryModel extends Model<
   InferAttributes<CategoryModel>,
   InferCreationAttributes<CategoryModel>
 > {
-  declare id: CreationOptional<number>;
+  declare category_id: CreationOptional<number>;
   declare name: string;
   declare description: string;
   declare icon: Text;
@@ -19,7 +19,7 @@ class CategoryModel extends Model<
   public static initialize(sequelize: Sequelize) {
     CategoryModel.init(
       {
-        id: {
+        category_id: {
           type: DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true,

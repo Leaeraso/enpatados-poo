@@ -11,14 +11,14 @@ class SubcategoryModel extends Model<
   InferAttributes<SubcategoryModel>,
   InferCreationAttributes<SubcategoryModel>
 > {
-  declare id: CreationOptional<number>;
+  declare subcategory_id: CreationOptional<number>;
   declare name: string;
   declare category_id: number;
 
   public static initialize(sequelize: Sequelize) {
     SubcategoryModel.init(
       {
-        id: {
+        subcategory_id: {
           type: DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true,

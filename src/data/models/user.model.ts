@@ -11,11 +11,11 @@ class UserModel extends Model<
   InferAttributes<UserModel>,
   InferCreationAttributes<UserModel>
 > {
-  declare id: CreationOptional<number>;
+  declare user_id: CreationOptional<number>;
   declare google_id: string | null;
   declare name: string;
   declare surname: string;
-  declare password: string;
+  declare password: string | null;
   declare email: string;
   declare date_of_birth: Date | null;
   declare role: CreationOptional<string>;
@@ -23,7 +23,7 @@ class UserModel extends Model<
   public static initialize(sequelize: Sequelize) {
     UserModel.init(
       {
-        id: {
+        user_id: {
           type: DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true,

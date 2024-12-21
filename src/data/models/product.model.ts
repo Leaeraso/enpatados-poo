@@ -11,7 +11,7 @@ class ProductModel extends Model<
   InferAttributes<ProductModel>,
   InferCreationAttributes<ProductModel>
 > {
-  declare id: CreationOptional<number>;
+  declare product_id: CreationOptional<number>;
   declare name: string;
   declare description: string;
   declare price: number;
@@ -22,7 +22,7 @@ class ProductModel extends Model<
   public static initialize(sequelize: Sequelize) {
     ProductModel.init(
       {
-        id: {
+        product_id: {
           type: DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true,

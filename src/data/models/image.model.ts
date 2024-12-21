@@ -11,14 +11,14 @@ class ImageModel extends Model<
   InferAttributes<ImageModel>,
   InferCreationAttributes<ImageModel>
 > {
-  declare id: CreationOptional<number>;
+  declare image_id: CreationOptional<number>;
   declare url: string;
   declare product_id: number;
 
   public static initialize(sequelize: Sequelize) {
     ImageModel.init(
       {
-        id: {
+        image_id: {
           type: DataTypes.INTEGER,
           primaryKey: true,
           autoIncrement: true,
