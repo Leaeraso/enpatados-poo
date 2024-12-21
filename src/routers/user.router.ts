@@ -9,13 +9,15 @@ import UserService from '../services/user.service';
 class UserRouter extends Configuration {
   public router: express.Router;
   private SECRET_KEY: string;
-  private CORS: string | undefined;
+  private CORS: string;
+  private EXPIRES_TOKEN: string;
 
   constructor() {
     super();
     this.router = express.Router();
     this.SECRET_KEY = this.getEnviroment('SECRET_KEY')!;
     this.CORS = this.getEnviroment('CORS')!;
+    this.EXPIRES_TOKEN = this.getEnviroment('EXPIRES_TOKEN')!;
 
     this.createRouters();
   }
@@ -41,13 +43,18 @@ class UserRouter extends Configuration {
       '/user/pass/recovery',
       this.handlePasswordRecovery.bind(this)
     );
-    this.router.post('/user/register');
-    this.router.post('/user/login');
-    this.router.put('/user/reset', authTokenMiddleware.authToken);
+    this.router.post('/user/register', this.handleRegisterUser.bind(this));
+    this.router.post('/user/login', this.handleLoginUser.bind(this));
+    this.router.put(
+      '/user/reset',
+      authTokenMiddleware.authToken,
+      this.handleUserResetPassword.bind(this)
+    );
     this.router.put(
       '/user/:id',
       authTokenMiddleware.authToken,
-      authPermissionsMiddleware.authPermissions(['admin'])
+      authPermissionsMiddleware.authPermissions(['admin']),
+      this.handleUpdateUser.bind(this)
     );
   }
 
@@ -101,6 +108,69 @@ class UserRouter extends Configuration {
     next: NextFunction
   ) {
     UserService.passwordRecovery(req.body, this.SECRET_KEY)
+      .then((result) => res.json(result))
+      .catch((err) => next(err));
+  }
+
+  private handleRegisterUser(req: Request, res: Response, next: NextFunction) {
+    const user = {
+      name: req.body.name,
+      surname: req.body.surname,
+      password: req.body.password,
+      email: req.body.email,
+      dateOfBirth: req.body.dateOfBirth,
+    };
+
+    UserService.registerUser(user, this.SECRET_KEY, this.EXPIRES_TOKEN)
+      .then((result) => {
+        res.cookie('token', result, {
+          httpOnly: true,
+          secure: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          signed: true,
+        });
+        //solo para development
+        res.json(result);
+      })
+      .catch((err) => next(err));
+  }
+
+  private handleLoginUser(req: Request, res: Response, next: NextFunction) {
+    const loginUser = {
+      email: req.body.email,
+      password: req.body.password,
+    };
+
+    UserService.loginUser(loginUser, this.SECRET_KEY, this.EXPIRES_TOKEN)
+      .then((result) => {
+        res.cookie('token', result, {
+          httpOnly: true,
+          secure: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          signed: true,
+        });
+        //solo para development
+        res.json(result);
+      })
+      .catch((err) => next(err));
+  }
+
+  private handleUserResetPassword(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    UserService.resetPassword(
+      String(req.query.token),
+      req.body.password,
+      this.SECRET_KEY
+    )
+      .then((result) => res.json(result))
+      .catch((err) => next(err));
+  }
+
+  private handleUpdateUser(req: Request, res: Response, next: NextFunction) {
+    UserService.updateUser(req.body, Number(req.params.id), req.user.role)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
