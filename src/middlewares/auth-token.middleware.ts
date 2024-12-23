@@ -1,6 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
 import { Configuration } from '../config/config';
 import jwt, { TokenExpiredError } from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+interface User {
+  id: string;
+  email: string;
+  role: string;
+}
+
+dotenv.config();
 
 class AuthTokenMiddleware extends Configuration {
   private SECRET_KEY: string;
@@ -12,8 +21,11 @@ class AuthTokenMiddleware extends Configuration {
 
   authToken(req: Request, _res: Response, next: NextFunction) {
     try {
-      //const token = req.signedCookies.token
+      // let token = req.signedCookies.token;
       let token = req.headers['authorization']?.split(' ')[1];
+
+      console.log('token', token);
+      console.log('secret_key', this.SECRET_KEY);
 
       if (!token) {
         token =
@@ -26,9 +38,20 @@ class AuthTokenMiddleware extends Configuration {
         });
       }
 
-      const user = jwt.verify(token!, this.SECRET_KEY);
-      req.user = user;
+      const user = jwt.verify(token, this.SECRET_KEY);
+
+      if (
+        typeof user === 'object' &&
+        'id' in user &&
+        'email' in user &&
+        'role' in user
+      ) {
+        req.user = user as User;
+      } else {
+        return next({ message: 'Invalid token' });
+      }
     } catch (error) {
+      console.error(error);
       if (error instanceof TokenExpiredError) {
         return next({
           message: 'Token is expired. Please login again',

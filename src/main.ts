@@ -4,17 +4,22 @@ import cors from 'cors';
 import { Configuration } from './config/config';
 import { Connection } from './config/database/connection.database';
 import ModelsInitializer from './data/models/models-initializer';
+import userRouter from './routers/user.router';
+import cookieParser from 'cookie-parser';
 
 class Main extends Configuration {
   public app: express.Application;
   private HTTP_PORT: number = this.getNumberEnviroment('HTTP_PORT');
   private API_URL: string = this.getEnviroment('API_URL')!;
+  private SECRET_KEY: string = this.getEnviroment('SECRET_KEY')!;
 
   constructor() {
     super();
     this.app = express();
     this.app.use(express.json());
+    this.app.use(cookieParser(this.SECRET_KEY));
     this.app.use(morgan('dev'));
+    this.app.use(userRouter);
     this.corsConfig();
     this.initializeDatabase();
 

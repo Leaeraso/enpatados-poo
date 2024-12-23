@@ -54,6 +54,10 @@ class UserService {
         distinct: true,
       });
 
+      console.log(`count: ${count}
+          rows: ${rows}
+        `);
+
       if (rows.length === 0) {
         throw new NotFoundError('User not found');
       }
@@ -63,10 +67,13 @@ class UserService {
         return { user_id, name, surname, email };
       });
 
+      console.log('users', users);
+
       const totalPages = Math.ceil(count / pageSize);
 
       return { users, totalPages, count };
     } catch (error) {
+      console.error(error);
       throw new InternalServerError('Error trying to get the users');
     }
   }
@@ -106,6 +113,8 @@ class UserService {
         email: user.email,
         date_of_birth: user.dateOfBirth,
       });
+
+      console.log('ExpireIn:', EXPIRE_TOKEN);
 
       const tokenInfo = {
         id: newUser.user_id,

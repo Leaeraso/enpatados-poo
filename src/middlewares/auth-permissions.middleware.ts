@@ -4,7 +4,7 @@ class AuthPermissionsMiddleware {
   authPermissions(permissions: string[]) {
     return (req: Request, _res: Response, next: NextFunction) => {
       try {
-        if (permissions.includes(req.user?.role)) {
+        if (permissions.includes(req.user!.role)) {
           next();
         } else {
           return next({

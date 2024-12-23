@@ -11,14 +11,14 @@ class UserRouter extends Configuration {
   public router: express.Router;
   private SECRET_KEY: string;
   private CORS: string;
-  private EXPIRES_TOKEN: string;
+  private EXPIRE_TOKEN: string;
 
   constructor() {
     super();
     this.router = express.Router();
     this.SECRET_KEY = this.getEnviroment('SECRET_KEY')!;
     this.CORS = this.getEnviroment('CORS')!;
-    this.EXPIRES_TOKEN = this.getEnviroment('EXPIRES_TOKEN')!;
+    this.EXPIRE_TOKEN = this.getEnviroment('EXPIRE_TOKEN')!;
 
     this.createRouters();
   }
@@ -40,14 +40,17 @@ class UserRouter extends Configuration {
       this.handleAuthGoogleCallback.bind(this),
       ErrorMiddleware.handleError
     );
-    this.router.get('/user/', authTokenMiddleware.authToken),
+    this.router.get(
+      '/user/',
+      authTokenMiddleware.authToken,
       this.handleGetUsers.bind(this),
-      ErrorMiddleware.handleError;
-    this.router.post(
-      '/user/pass/recovery',
-      this.handlePasswordRecovery.bind(this),
       ErrorMiddleware.handleError
-    );
+    ),
+      this.router.post(
+        '/user/pass/recovery',
+        this.handlePasswordRecovery.bind(this),
+        ErrorMiddleware.handleError
+      );
     this.router.post(
       '/user/register',
       this.handleRegisterUser.bind(this),
@@ -97,14 +100,17 @@ class UserRouter extends Configuration {
     next: NextFunction
   ) {
     if (!req.user) {
-      next({ statusCode: 401, message: 'Error trying to login with Google' });
+      return next({
+        statusCode: 401,
+        message: 'Error trying to login with Google',
+      });
     }
 
-    const token = jwt.sign(
-      { id: req.user.id, email: req.user.emial, role: req.user.role },
-      this.SECRET_KEY,
-      { expiresIn: this.getEnviroment('EXPIRE_TOKEN') }
-    );
+    const { id, email, role } = req.user;
+
+    const token = jwt.sign({ id, email, role }, this.SECRET_KEY, {
+      expiresIn: this.getEnviroment('EXPIRE_TOKEN'),
+    });
 
     res.redirect(`${this.CORS?.split(' ')[0]}/auth/google?token=${token}`);
   }
@@ -114,7 +120,10 @@ class UserRouter extends Configuration {
 
     UserService.getUsers(Number(page), Number(pageSize))
       .then((result) => res.json(result))
-      .catch((err) => next(err));
+      .catch((err) => {
+        console.error(err);
+        next(err);
+      });
   }
 
   private handlePasswordRecovery(
@@ -136,7 +145,7 @@ class UserRouter extends Configuration {
       dateOfBirth: req.body.dateOfBirth,
     };
 
-    UserService.registerUser(user, this.SECRET_KEY, this.EXPIRES_TOKEN)
+    UserService.registerUser(user, this.SECRET_KEY, this.EXPIRE_TOKEN)
       .then((result) => {
         res.cookie('token', result, {
           httpOnly: true,
@@ -156,7 +165,7 @@ class UserRouter extends Configuration {
       password: req.body.password,
     };
 
-    UserService.loginUser(loginUser, this.SECRET_KEY, this.EXPIRES_TOKEN)
+    UserService.loginUser(loginUser, this.SECRET_KEY, this.EXPIRE_TOKEN)
       .then((result) => {
         res.cookie('token', result, {
           httpOnly: true,
@@ -185,7 +194,9 @@ class UserRouter extends Configuration {
   }
 
   private handleUpdateUser(req: Request, res: Response, next: NextFunction) {
-    UserService.updateUser(req.body, Number(req.params.id), req.user.role)
+    const user = req.user as any;
+
+    UserService.updateUser(req.body, Number(req.params.id), user.role)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }

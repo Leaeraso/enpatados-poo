@@ -2,12 +2,15 @@ import { JwtPayload } from 'jsonwebtoken';
 import { Request } from 'express';
 
 declare global {
-  declare namespace Express {
-    export interface Request {
-      user: any;
+  namespace Express {
+    interface User {
+      id: string;
+      email: string;
+      role: string;
     }
-    export interface Response {
-      user: any;
+
+    interface Request {
+      user?: User;
     }
   }
 }
