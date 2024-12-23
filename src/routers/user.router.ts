@@ -5,6 +5,7 @@ import { Configuration } from '../config/config';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import UserService from '../services/user.service';
+import { ErrorMiddleware } from '../middlewares/error.middleware';
 
 class UserRouter extends Configuration {
   public router: express.Router;
@@ -26,7 +27,8 @@ class UserRouter extends Configuration {
     this.router.get(
       '/user/auth/token',
       authTokenMiddleware.authToken,
-      this.handleValidateSession.bind(this)
+      this.handleValidateSession.bind(this),
+      ErrorMiddleware.handleError
     );
     this.router.get('/user/auth/google', this.handleAuthGoogle.bind(this));
     this.router.get(
@@ -35,26 +37,39 @@ class UserRouter extends Configuration {
         failureMessage: 'Error trying to login with Google',
         failureRedirect: '/login',
       }),
-      this.handleAuthGoogleCallback.bind(this)
+      this.handleAuthGoogleCallback.bind(this),
+      ErrorMiddleware.handleError
     );
     this.router.get('/user/', authTokenMiddleware.authToken),
-      this.handleGetUsers.bind(this);
+      this.handleGetUsers.bind(this),
+      ErrorMiddleware.handleError;
     this.router.post(
       '/user/pass/recovery',
-      this.handlePasswordRecovery.bind(this)
+      this.handlePasswordRecovery.bind(this),
+      ErrorMiddleware.handleError
     );
-    this.router.post('/user/register', this.handleRegisterUser.bind(this));
-    this.router.post('/user/login', this.handleLoginUser.bind(this));
-    this.router.put(
+    this.router.post(
+      '/user/register',
+      this.handleRegisterUser.bind(this),
+      ErrorMiddleware.handleError
+    );
+    this.router.post(
+      '/user/login',
+      this.handleLoginUser.bind(this),
+      ErrorMiddleware.handleError
+    );
+    this.router.patch(
       '/user/reset',
       authTokenMiddleware.authToken,
-      this.handleUserResetPassword.bind(this)
+      this.handleUserResetPassword.bind(this),
+      ErrorMiddleware.handleError
     );
     this.router.put(
       '/user/:id',
       authTokenMiddleware.authToken,
       authPermissionsMiddleware.authPermissions(['admin']),
-      this.handleUpdateUser.bind(this)
+      this.handleUpdateUser.bind(this),
+      ErrorMiddleware.handleError
     );
   }
 
@@ -64,7 +79,7 @@ class UserRouter extends Configuration {
     next: NextFunction
   ) {
     if (!req.user) {
-      next({ message: 'Error verifying the session' });
+      next({ statusCode: 401, message: 'Error verifying the session' });
     }
 
     res.status(200).json({ user: req.user });
@@ -82,7 +97,7 @@ class UserRouter extends Configuration {
     next: NextFunction
   ) {
     if (!req.user) {
-      next();
+      next({ statusCode: 401, message: 'Error trying to login with Google' });
     }
 
     const token = jwt.sign(

@@ -5,6 +5,42 @@ import EmailHelper from '../helpers/email.helper';
 import ValidateHelper from '../helpers/validate.helper';
 import bcrypt from 'bcryptjs';
 
+class NotFoundError extends Error {
+  public statusCode: number;
+
+  constructor(message: string) {
+    super(message);
+    this.statusCode = 404;
+  }
+}
+
+class BadRequestError extends Error {
+  public statusCode: number;
+
+  constructor(message: string) {
+    super(message);
+    this.statusCode = 400;
+  }
+}
+
+class UnauthorizedError extends Error {
+  public statusCode: number;
+
+  constructor(message: string) {
+    super(message);
+    this.statusCode = 401;
+  }
+}
+
+class InternalServerError extends Error {
+  public statusCode: number;
+
+  constructor(message: string) {
+    super(message);
+    this.statusCode = 500;
+  }
+}
+
 class UserService {
   async getUsers(page: number, pageSize: number) {
     try {
@@ -19,7 +55,7 @@ class UserService {
       });
 
       if (rows.length === 0) {
-        throw new Error('Users not found');
+        throw new NotFoundError('User not found');
       }
 
       const users: Partial<UserDTO>[] = rows.map((row) => {
@@ -30,9 +66,8 @@ class UserService {
       const totalPages = Math.ceil(count / pageSize);
 
       return { users, totalPages, count };
-    } catch (error: any) {
-      console.error('Error trying to get the users', error);
-      return { message: `Error: ${error.message}` };
+    } catch (error) {
+      throw new InternalServerError('Error trying to get the users');
     }
   }
 
@@ -45,9 +80,8 @@ class UserService {
       await EmailHelper.sendPasswordRecoveryMail(email, verificationToken);
 
       return { message: 'Email sent successfully' };
-    } catch (error: any) {
-      console.error('Error sending the email', error);
-      return { message: `Error: ${error.message}` };
+    } catch (error) {
+      throw new InternalServerError('Error sending the email');
     }
   }
 
@@ -60,7 +94,7 @@ class UserService {
       });
 
       if (existingUser) {
-        throw new Error('User already registered');
+        throw new BadRequestError('User already registered');
       }
 
       const hashPass = await bcrypt.hash(user.password, 10);
@@ -84,9 +118,8 @@ class UserService {
       });
 
       return token;
-    } catch (error: any) {
-      console.error('Error registering the user', error);
-      return { message: `Error: ${error.message}` };
+    } catch (error) {
+      throw new InternalServerError('Error registering the user');
     }
   }
 
@@ -101,7 +134,7 @@ class UserService {
       });
 
       if (!existingUser) {
-        throw new Error('User not found');
+        throw new NotFoundError('User not found');
       }
 
       const validation = await bcrypt.compare(
@@ -110,7 +143,7 @@ class UserService {
       );
 
       if (!validation) {
-        throw new Error('Invalid password');
+        throw new BadRequestError('Invalid password');
       }
 
       const tokenInfo = {
@@ -124,20 +157,19 @@ class UserService {
       });
 
       return token;
-    } catch (error: any) {
-      console.error('Error login the user', error);
-      return { message: `Error: ${error.message}` };
+    } catch (error) {
+      throw new InternalServerError('Error login the user');
     }
   }
 
   async resetPassword(token: string, newPassword: string, SECRET_KEY: string) {
     try {
       if (!token || typeof token !== 'string') {
-        throw new Error('Token not given');
+        throw new BadRequestError('Token not given');
       }
 
       if (!newPassword) {
-        throw new Error('Invalid password');
+        throw new BadRequestError('Invalid password');
       }
 
       const userEmail = await new Promise<string>((resolve, reject) => {
@@ -158,7 +190,7 @@ class UserService {
       const user = await UserModel.findOne({ where: { email: userEmail } });
 
       if (!user) {
-        throw new Error('User not found');
+        throw new NotFoundError('User not found');
       }
 
       const hashPass = await bcrypt.hash(newPassword, 10);
@@ -166,9 +198,8 @@ class UserService {
       await user.update({ password: hashPass });
 
       return { message: 'password updated successfully' };
-    } catch (error: any) {
-      console.error('Error updating the password', error);
-      return { message: `Error: ${error.message}` };
+    } catch (error) {
+      throw new InternalServerError('Error updating the password');
     }
   }
 
@@ -177,11 +208,13 @@ class UserService {
       const user = await UserModel.findByPk(id);
 
       if (!user) {
-        throw new Error('User not found');
+        throw new NotFoundError('User not found');
       }
 
       if (updatedData.role && role !== 'admin') {
-        throw new Error('You are not allowed to change the user role');
+        throw new UnauthorizedError(
+          'You are not allowed to change the user role'
+        );
       }
 
       if (updatedData.password) {
@@ -192,9 +225,8 @@ class UserService {
       await user.update(updatedData);
 
       return user;
-    } catch (error: any) {
-      console.error('Error updating the user', error);
-      return { message: `Error: ${error.message}` };
+    } catch (error) {
+      throw new InternalServerError('Error updating the user');
     }
   }
 }
