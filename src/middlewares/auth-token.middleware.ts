@@ -25,7 +25,7 @@ class AuthTokenMiddleware extends Configuration {
       let token = req.headers['authorization']?.split(' ')[1];
 
       console.log('token', token);
-      console.log('secret_key', this.SECRET_KEY);
+      // console.log('secret_key', this.SECRET_KEY);
 
       if (!token) {
         token =
@@ -47,6 +47,8 @@ class AuthTokenMiddleware extends Configuration {
         'role' in user
       ) {
         req.user = user as User;
+        console.log('token validated successfully');
+        next();
       } else {
         return next({ message: 'Invalid token' });
       }

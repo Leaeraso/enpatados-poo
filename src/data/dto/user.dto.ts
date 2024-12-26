@@ -4,7 +4,7 @@ interface UserDTO {
   surname: string;
   email: string;
   password: string;
-  dateOfBirth: Date;
+  dateOfBirth?: Date;
   role?: string;
 }
 

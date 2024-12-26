@@ -6,6 +6,7 @@ import { Connection } from './config/database/connection.database';
 import ModelsInitializer from './data/models/models-initializer';
 import userRouter from './routers/user.router';
 import cookieParser from 'cookie-parser';
+import { Passport } from './config/passport/passport';
 
 class Main extends Configuration {
   public app: express.Application;
@@ -24,6 +25,7 @@ class Main extends Configuration {
     this.initializeDatabase();
 
     new ModelsInitializer();
+    new Passport();
 
     this.listen();
   }

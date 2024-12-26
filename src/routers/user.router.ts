@@ -26,7 +26,7 @@ class UserRouter extends Configuration {
   createRouters(): void {
     this.router.get(
       '/user/auth/token',
-      authTokenMiddleware.authToken,
+      authTokenMiddleware.authToken.bind(authTokenMiddleware),
       this.handleValidateSession.bind(this),
       ErrorMiddleware.handleError
     );
@@ -42,7 +42,7 @@ class UserRouter extends Configuration {
     );
     this.router.get(
       '/user/',
-      authTokenMiddleware.authToken,
+      authTokenMiddleware.authToken.bind(authTokenMiddleware),
       this.handleGetUsers.bind(this),
       ErrorMiddleware.handleError
     ),
@@ -63,13 +63,13 @@ class UserRouter extends Configuration {
     );
     this.router.patch(
       '/user/reset',
-      authTokenMiddleware.authToken,
+      authTokenMiddleware.authToken.bind(authTokenMiddleware),
       this.handleUserResetPassword.bind(this),
       ErrorMiddleware.handleError
     );
     this.router.put(
       '/user/:id',
-      authTokenMiddleware.authToken,
+      authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware.authPermissions(['admin']),
       this.handleUpdateUser.bind(this),
       ErrorMiddleware.handleError
@@ -131,7 +131,7 @@ class UserRouter extends Configuration {
     res: Response,
     next: NextFunction
   ) {
-    UserService.passwordRecovery(req.body, this.SECRET_KEY)
+    UserService.passwordRecovery(req.body.email, this.SECRET_KEY)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
@@ -184,11 +184,9 @@ class UserRouter extends Configuration {
     res: Response,
     next: NextFunction
   ) {
-    UserService.resetPassword(
-      String(req.query.token),
-      req.body.password,
-      this.SECRET_KEY
-    )
+    const token = req.query.token;
+
+    UserService.resetPassword(String(token), req.body.password, this.SECRET_KEY)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
