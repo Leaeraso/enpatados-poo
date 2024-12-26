@@ -1,11 +1,11 @@
 import express, { NextFunction, Request, Response } from 'express';
 import authTokenMiddleware from '../middlewares/auth-token.middleware';
 import authPermissionsMiddleware from '../middlewares/auth-permissions.middleware';
-import { Configuration } from '../config/config';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import UserService from '../services/user.service';
 import { ErrorMiddleware } from '../middlewares/error.middleware';
+import { Configuration } from '../config/config';
 
 class UserRouter extends Configuration {
   public router: express.Router;
@@ -25,14 +25,14 @@ class UserRouter extends Configuration {
 
   createRouters(): void {
     this.router.get(
-      '/user/auth/token',
+      '/auth/token',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       this.handleValidateSession.bind(this),
       ErrorMiddleware.handleError
     );
-    this.router.get('/user/auth/google', this.handleAuthGoogle.bind(this));
+    this.router.get('/auth/google', this.handleAuthGoogle.bind(this));
     this.router.get(
-      '/user/auth/google/callback',
+      '/auth/google/callback',
       passport.authenticate('google', {
         failureMessage: 'Error trying to login with Google',
         failureRedirect: '/login',
@@ -41,34 +41,34 @@ class UserRouter extends Configuration {
       ErrorMiddleware.handleError
     );
     this.router.get(
-      '/user/',
+      '/',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       this.handleGetUsers.bind(this),
       ErrorMiddleware.handleError
     ),
       this.router.post(
-        '/user/pass/recovery',
+        '/pass/recovery',
         this.handlePasswordRecovery.bind(this),
         ErrorMiddleware.handleError
       );
     this.router.post(
-      '/user/register',
+      '/register',
       this.handleRegisterUser.bind(this),
       ErrorMiddleware.handleError
     );
     this.router.post(
-      '/user/login',
+      '/login',
       this.handleLoginUser.bind(this),
       ErrorMiddleware.handleError
     );
     this.router.patch(
-      '/user/reset',
+      '/reset',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       this.handleUserResetPassword.bind(this),
       ErrorMiddleware.handleError
     );
     this.router.put(
-      '/user/:id',
+      '/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware.authPermissions(['admin']),
       this.handleUpdateUser.bind(this),

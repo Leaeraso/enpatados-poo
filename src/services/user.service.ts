@@ -59,7 +59,7 @@ class UserService {
         `);
 
       if (rows.length === 0) {
-        throw new NotFoundError('User not found');
+        throw new NotFoundError('Users not found');
       }
 
       const users: Partial<UserDTO>[] = rows.map((row) => {

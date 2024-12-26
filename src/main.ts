@@ -4,9 +4,9 @@ import cors from 'cors';
 import { Configuration } from './config/config';
 import { Connection } from './config/database/connection.database';
 import ModelsInitializer from './data/models/models-initializer';
-import userRouter from './routers/user.router';
 import cookieParser from 'cookie-parser';
 import { Passport } from './config/passport/passport';
+import indexRouter from './routers/index.router';
 
 class Main extends Configuration {
   public app: express.Application;
@@ -20,7 +20,7 @@ class Main extends Configuration {
     this.app.use(express.json());
     this.app.use(cookieParser(this.SECRET_KEY));
     this.app.use(morgan('dev'));
-    this.app.use(userRouter);
+    this.app.use(indexRouter);
     this.corsConfig();
     this.initializeDatabase();
 
