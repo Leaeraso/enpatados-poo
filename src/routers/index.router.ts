@@ -3,6 +3,7 @@ import ProductRouter from './product.router';
 import UserRouter from './user.router';
 import CategoryRouter from './category.router';
 import SubcategoryRouter from './subcategory.router';
+import ImageRouter from './image.router';
 
 class IndexRouter {
   public router: express.Router;
@@ -18,6 +19,7 @@ class IndexRouter {
     this.router.use('/user', UserRouter);
     this.router.use('/category', CategoryRouter);
     this.router.use('/subcategory', SubcategoryRouter);
+    this.router.use('/image', ImageRouter);
   }
 }
 

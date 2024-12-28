@@ -182,21 +182,6 @@ class UserService {
         throw new BadRequestError('Invalid password');
       }
 
-      // const userEmail = await new Promise<string>((resolve, reject) => {
-      //   jwt.verify(token, SECRET_KEY, async (err, decoded) => {
-      //     if (err) {
-      //       console.error(err);
-      //       return reject('Invalid or expired token');
-      //     }
-
-      //     if (decoded && typeof decoded !== 'string' && 'email' in decoded) {
-      //       resolve((decoded as JwtPayload).email);
-      //     } else {
-      //       reject('Invalid or expired token');
-      //     }
-      //   });
-      // });
-
       const decodedToken = jwt.verify(token, SECRET_KEY) as JwtPayload;
       console.log('token', token);
 

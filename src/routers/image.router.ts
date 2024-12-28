@@ -1,10 +1,10 @@
 import express, { NextFunction, Request, Response } from 'express';
-import SubcategoryService from '../services/subcategory.service';
 import authTokenMiddleware from '../middlewares/auth-token.middleware';
 import authPermissionsMiddleware from '../middlewares/auth-permissions.middleware';
 import { ErrorMiddleware } from '../middlewares/error.middleware';
+import ImageService from '../services/image.service';
 
-class SubcategoryRouter {
+class ImageRouter {
   public router: express.Router;
 
   constructor() {
@@ -16,12 +16,20 @@ class SubcategoryRouter {
   createRouters(): void {
     this.router.get(
       '/',
-      this.handleGetSubcategories.bind(this),
+      authTokenMiddleware.authToken.bind(authTokenMiddleware),
+      authPermissionsMiddleware
+        .authPermissions(['admin'])
+        .bind(authPermissionsMiddleware),
+      this.handleGetImages.bind(this),
       ErrorMiddleware.handleError
     );
     this.router.get(
       '/:id',
-      this.handleGetSubcategoryById.bind(this),
+      authTokenMiddleware.authToken.bind(authTokenMiddleware),
+      authPermissionsMiddleware
+        .authPermissions(['admin'])
+        .bind(authPermissionsMiddleware),
+      this.handleGetImagesByProductId.bind(this),
       ErrorMiddleware.handleError
     );
     this.router.post(
@@ -30,7 +38,7 @@ class SubcategoryRouter {
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleCreateSubcategory.bind(this),
+      this.handleCreateImage.bind(this),
       ErrorMiddleware.handleError
     );
     this.router.put(
@@ -39,7 +47,7 @@ class SubcategoryRouter {
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleUpdateSubcategory.bind(this),
+      this.handleUpdateImage.bind(this),
       ErrorMiddleware.handleError
     );
     this.router.delete(
@@ -48,67 +56,46 @@ class SubcategoryRouter {
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleDeleteSubcategory.bind(this),
+      this.handleDeleteImage.bind(this),
       ErrorMiddleware.handleError
     );
   }
 
-  private handleGetSubcategories(
-    _req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    SubcategoryService.getSubcategories()
+  private handleGetImages(req: Request, res: Response, next: NextFunction) {
+    const { page = 1, pageSize = 10 } = req.query;
+
+    ImageService.getImages(+page, +pageSize)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleGetSubcategoryById(
+  private handleGetImagesByProductId(
     req: Request,
     res: Response,
     next: NextFunction
   ) {
-    SubcategoryService.getSubcategoryById(Number(req.params.id))
+    ImageService.getImagesByProductId(Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleCreateSubcategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    const { name, categoryId } = req.body;
-
-    const subcategory = {
-      name,
-      categoryId,
-    };
-
-    SubcategoryService.createSubcategory(subcategory)
+  private handleCreateImage(req: Request, res: Response, next: NextFunction) {
+    ImageService.createImage(req.body)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleUpdateSubcategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    SubcategoryService.updateSubcategory(req.body, Number(req.params.id))
+  private handleUpdateImage(req: Request, res: Response, next: NextFunction) {
+    ImageService.updateImage(req.body, Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleDeleteSubcategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    SubcategoryService.deleteSubcategory(Number(req.params.id))
+  private handleDeleteImage(req: Request, res: Response, next: NextFunction) {
+    ImageService.deleteImage(Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 }
 
-export default new SubcategoryRouter().router;
+export default new ImageRouter().router;
