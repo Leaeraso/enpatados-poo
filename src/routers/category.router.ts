@@ -53,12 +53,10 @@ class CategoryRouter {
     );
   }
 
-  private handleGetCategories(
-    _req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
-    CategoryService.getCategories()
+  private handleGetCategories(req: Request, res: Response, next: NextFunction) {
+    const { search } = req.body;
+
+    CategoryService.getCategories(search)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }

@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import CategoryDTO from '../data/dto/category.dto';
 import CategoryModel from '../data/models/category.model';
 import SubcategoryModel from '../data/models/subcategory.model';
@@ -30,9 +31,16 @@ class InternalServerError extends Error {
 }
 
 class CategoryService {
-  async getCategories() {
+  async getCategories(search?: string) {
     try {
+      let whereConditional: any = {};
+
+      if (search) {
+        whereConditional[Op.or] = [{ name: { [Op.like]: `%${search}%` } }];
+      }
+
       const categories = await CategoryModel.findAll({
+        ...whereConditional,
         include: [
           {
             model: SubcategoryModel,

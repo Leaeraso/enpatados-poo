@@ -54,11 +54,12 @@ class SubcategoryRouter {
   }
 
   private handleGetSubcategories(
-    _req: Request,
+    req: Request,
     res: Response,
     next: NextFunction
   ) {
-    SubcategoryService.getSubcategories()
+    const { search } = req.body;
+    SubcategoryService.getSubcategories(search)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
