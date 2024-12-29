@@ -197,6 +197,12 @@ class UserService {
         throw new NotFoundError('User not found');
       }
 
+      const isSamePassword = await bcrypt.compare(newPassword, user.password!);
+
+      if (isSamePassword) {
+        throw new BadRequestError('The password cannot be the same');
+      }
+
       const hashPass = await bcrypt.hash(newPassword, 10);
 
       await user.update({ password: hashPass });
