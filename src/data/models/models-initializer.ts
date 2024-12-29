@@ -30,13 +30,13 @@ class ModelsInitializer {
 
   public setupAssociations() {
     OrderModel.belongsToMany(ProductModel, {
-      through: 'order_product',
+      through: OrderProductModel,
       foreignKey: 'order_id',
       otherKey: 'product_id',
       as: 'products',
     });
     ProductModel.belongsToMany(OrderModel, {
-      through: 'order_product',
+      through: OrderProductModel,
       foreignKey: 'product_id',
       otherKey: 'order_id',
       as: 'orders',

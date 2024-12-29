@@ -7,7 +7,7 @@ import OrderDTO, { States } from '../data/dto/order.dto';
 import OrderProductModel from '../data/models/order-product.model.';
 
 type ProductWithOrderProduct = ProductModel & {
-  OrderProduct: {
+  OrderProductModel: {
     quantity: number;
   };
 };
@@ -91,7 +91,7 @@ class OrderService {
         offset: (page - 1) * pageSize,
       };
 
-      const orders = await OrderModel.findAll({
+      const { rows, count } = await OrderModel.findAndCountAll({
         ...options,
         order: [['createdAt', 'DESC']],
         include: [
@@ -114,13 +114,15 @@ class OrderService {
         ],
       });
 
-      if (orders.length === 0) {
+      if (rows.length === 0) {
         throw new NotFoundError('Orders not found');
       }
 
-      const ordersRet = orders.map((order) => order.toJSON());
+      const totalPages = Math.ceil(count / pageSize);
 
-      return ordersRet;
+      const orders = rows.map((row) => row.toJSON());
+
+      return { orders, totalPages, count };
     } catch (error) {
       console.error(error);
       throw new InternalServerError('Error trying to get the orders');
@@ -174,7 +176,11 @@ class OrderService {
         throw new BadRequestError('There is not products in the shipping cart');
       }
 
+      // console.log('products:', products);
+
       const productsIds = products.map((product) => product.productId);
+
+      console.log('productsIds:', productsIds);
 
       const productList = await ProductModel.findAll({
         where: { product_id: productsIds },
@@ -233,7 +239,20 @@ class OrderService {
 
   async updateOrder(updatedOrder: Partial<OrderDTO>, id: number) {
     try {
-      const order = await OrderModel.findByPk(id);
+      const order = await OrderModel.findOne({
+        where: {
+          order_number: id,
+        },
+        include: [
+          {
+            model: ProductModel,
+            as: 'products',
+            through: {
+              attributes: ['quantity'],
+            },
+          },
+        ],
+      });
 
       if (!order) {
         throw new NotFoundError('Order not found');
@@ -246,13 +265,16 @@ class OrderService {
       }
 
       if (updatedOrder.status === States.Paid) {
+        // console.log('order:', order);
+        console.log(JSON.stringify(order.products, null, 2));
+
         if (!order.products || order.products.length === 0) {
           throw new BadRequestError('Products not found');
         }
 
         for (const product of order.products as ProductWithOrderProduct[]) {
           const productId = product.product_id;
-          const quantityBought = product.OrderProduct.quantity;
+          const quantityBought = product.OrderProductModel.quantity;
 
           await ProductModel.decrement('stock', {
             by: quantityBought,
