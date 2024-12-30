@@ -63,8 +63,8 @@ class UserService {
       }
 
       const users: Partial<UserDTO>[] = rows.map((row) => {
-        const { user_id, name, surname, email } = row.toJSON();
-        return { user_id, name, surname, email };
+        const { user_id, name, surname, email, role } = row.toJSON();
+        return { user_id, name, surname, email, role };
       });
 
       console.log('users', users);
