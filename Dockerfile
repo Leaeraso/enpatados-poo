@@ -1,5 +1,5 @@
 # Usamos la imagen base node:22-alpine
-FROM node:22-apline
+FROM node:22-alpine
 
 # Creamos y establecemos el directorio de trabajo en el contenedor
 WORKDIR /usr/src/app
