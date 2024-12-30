@@ -54,6 +54,7 @@ class Main extends Configuration {
           callback(new Error('Not allowed by cors'));
         }
       },
+      credentials: true,
     };
 
     this.app.use(cors(corsOptions));
