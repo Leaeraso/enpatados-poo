@@ -17,11 +17,13 @@ class Main extends Configuration {
   constructor() {
     super();
     this.app = express();
+
     this.app.use(express.json());
     this.app.use(cookieParser(this.SECRET_KEY));
     this.app.use(morgan('dev'));
-    this.app.use(indexRouter);
+
     this.corsConfig();
+    this.app.use(indexRouter);
     this.initializeDatabase();
 
     new ModelsInitializer();
