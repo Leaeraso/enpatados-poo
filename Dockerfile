@@ -17,7 +17,7 @@ COPY . .
 RUN npm install typescript --save-dev
 
 # Compila el código TypeScript
-RUN npm run tsc
+RUN npx tsc
 
 # Expone el puerto que utiliza tu API
 EXPOSE 3000

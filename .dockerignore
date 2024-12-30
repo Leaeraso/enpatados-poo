@@ -1,0 +1,4 @@
+node_modules
+*.log
+*.ts
+build/  # Si ya se compila dentro del contenedor, puedes ignorar esta carpeta local
