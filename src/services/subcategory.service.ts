@@ -13,7 +13,7 @@ class SubcategoryService {
     }
 
     const subcategories = await SubcategoryModel.findAll({
-      ...whereConditional,
+      where: whereConditional,
       include: [
         {
           model: CategoryModel,
