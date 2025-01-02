@@ -7,6 +7,7 @@ import ModelsInitializer from './data/models/models-initializer';
 import cookieParser from 'cookie-parser';
 import { Passport } from './config/passport/passport';
 import indexRouter from './routers/index.router';
+import { ErrorMiddleware } from './middlewares/error.middleware';
 
 class Main extends Configuration {
   public app: express.Application;
@@ -21,6 +22,7 @@ class Main extends Configuration {
     this.app.use(express.json());
     this.app.use(cookieParser(this.SECRET_KEY));
     this.app.use(morgan('dev'));
+    this.app.use(ErrorMiddleware.handleError);
 
     this.corsConfig();
     this.app.use(indexRouter);

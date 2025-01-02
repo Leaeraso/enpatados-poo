@@ -2,7 +2,6 @@ import express, { NextFunction, Request, Response } from 'express';
 import SubcategoryService from '../services/subcategory.service';
 import authTokenMiddleware from '../middlewares/auth-token.middleware';
 import authPermissionsMiddleware from '../middlewares/auth-permissions.middleware';
-import { ErrorMiddleware } from '../middlewares/error.middleware';
 
 class SubcategoryRouter {
   public router: express.Router;
@@ -14,71 +13,48 @@ class SubcategoryRouter {
   }
 
   createRouters(): void {
-    this.router.get(
-      '/',
-      this.handleGetSubcategories.bind(this),
-      ErrorMiddleware.handleError
-    );
-    this.router.get(
-      '/:id',
-      this.handleGetSubcategoryById.bind(this),
-      ErrorMiddleware.handleError
-    );
+    this.router.get('/subcategory/', this.getSubcategories.bind(this));
+    this.router.get('/subcategory/:id', this.getSubcategoryById.bind(this));
     this.router.post(
-      '/',
+      '/subcategory/',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleCreateSubcategory.bind(this),
-      ErrorMiddleware.handleError
+      this.createSubcategory.bind(this)
     );
     this.router.put(
-      '/:id',
+      '/subcategory/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleUpdateSubcategory.bind(this),
-      ErrorMiddleware.handleError
+      this.updateSubcategory.bind(this)
     );
     this.router.delete(
-      '/:id',
+      '/subcategory/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleDeleteSubcategory.bind(this),
-      ErrorMiddleware.handleError
+      this.deleteSubcategory.bind(this)
     );
   }
 
-  private handleGetSubcategories(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  private getSubcategories(req: Request, res: Response, next: NextFunction) {
     const { search } = req.body;
     SubcategoryService.getSubcategories(search)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleGetSubcategoryById(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  private getSubcategoryById(req: Request, res: Response, next: NextFunction) {
     SubcategoryService.getSubcategoryById(Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleCreateSubcategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  private createSubcategory(req: Request, res: Response, next: NextFunction) {
     const { name, categoryId } = req.body;
 
     const subcategory = {
@@ -91,21 +67,13 @@ class SubcategoryRouter {
       .catch((err) => next(err));
   }
 
-  private handleUpdateSubcategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  private updateSubcategory(req: Request, res: Response, next: NextFunction) {
     SubcategoryService.updateSubcategory(req.body, Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleDeleteSubcategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  private deleteSubcategory(req: Request, res: Response, next: NextFunction) {
     SubcategoryService.deleteSubcategory(Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));

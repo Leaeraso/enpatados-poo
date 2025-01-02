@@ -1,7 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import authTokenMiddleware from '../middlewares/auth-token.middleware';
 import authPermissionsMiddleware from '../middlewares/auth-permissions.middleware';
-import { ErrorMiddleware } from '../middlewares/error.middleware';
 import ImageService from '../services/image.service';
 
 class ImageRouter {
@@ -15,53 +14,48 @@ class ImageRouter {
 
   createRouters(): void {
     this.router.get(
-      '/',
+      '/image/',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleGetImages.bind(this),
-      ErrorMiddleware.handleError
+      this.getImages.bind(this)
     );
     this.router.get(
-      '/:id',
+      '/image/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleGetImagesByProductId.bind(this),
-      ErrorMiddleware.handleError
+      this.getImagesByProductId.bind(this)
     );
     this.router.post(
-      '/',
+      '/image/',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleCreateImage.bind(this),
-      ErrorMiddleware.handleError
+      this.createImage.bind(this)
     );
     this.router.put(
-      '/:id',
+      '/image/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleUpdateImage.bind(this),
-      ErrorMiddleware.handleError
+      this.updateImage.bind(this)
     );
     this.router.delete(
-      '/:id',
+      '/image/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleDeleteImage.bind(this),
-      ErrorMiddleware.handleError
+      this.deleteImage.bind(this)
     );
   }
 
-  private handleGetImages(req: Request, res: Response, next: NextFunction) {
+  private getImages(req: Request, res: Response, next: NextFunction) {
     const { page = 1, pageSize = 10 } = req.query;
 
     ImageService.getImages(+page, +pageSize)
@@ -69,7 +63,7 @@ class ImageRouter {
       .catch((err) => next(err));
   }
 
-  private handleGetImagesByProductId(
+  private getImagesByProductId(
     req: Request,
     res: Response,
     next: NextFunction
@@ -79,19 +73,19 @@ class ImageRouter {
       .catch((err) => next(err));
   }
 
-  private handleCreateImage(req: Request, res: Response, next: NextFunction) {
+  private createImage(req: Request, res: Response, next: NextFunction) {
     ImageService.createImage(req.body)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleUpdateImage(req: Request, res: Response, next: NextFunction) {
+  private updateImage(req: Request, res: Response, next: NextFunction) {
     ImageService.updateImage(req.body, Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleDeleteImage(req: Request, res: Response, next: NextFunction) {
+  private deleteImage(req: Request, res: Response, next: NextFunction) {
     ImageService.deleteImage(Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));

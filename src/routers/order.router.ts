@@ -1,7 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import authTokenMiddleware from '../middlewares/auth-token.middleware';
 import authPermissionsMiddleware from '../middlewares/auth-permissions.middleware';
-import { ErrorMiddleware } from '../middlewares/error.middleware';
 import OrderService from '../services/order.service';
 import { Configuration } from '../config/config';
 
@@ -19,60 +18,50 @@ class OrderRouter extends Configuration {
 
   createRouters(): void {
     this.router.get(
-      '/user/:id',
+      '/order/user/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
-      this.handleGetOrdersByUserId.bind(this),
-      ErrorMiddleware.handleError
+      this.getOrdersByUserId.bind(this)
     );
     this.router.get(
-      '/',
+      '/order/',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleGetOrders.bind(this),
-      ErrorMiddleware.handleError
+      this.getOrders.bind(this)
     );
     this.router.get(
-      '/:id',
+      '/order/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleGetOrderById.bind(this),
-      ErrorMiddleware.handleError
+      this.getOrderById.bind(this)
     );
     this.router.post(
-      '/',
+      '/order/',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
-      this.handleCreateOrder.bind(this),
-      ErrorMiddleware.handleError
+      this.createOrder.bind(this)
     );
     this.router.put(
-      '/:id',
+      '/order/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleUpdateOrder.bind(this),
-      ErrorMiddleware.handleError
+      this.updateOrder.bind(this)
     );
     this.router.delete(
-      '/:id',
+      '/order/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleDeleteOrder.bind(this),
-      ErrorMiddleware.handleError
+      this.deleteOrder.bind(this)
     );
   }
 
-  private handleGetOrdersByUserId(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  private getOrdersByUserId(req: Request, res: Response, next: NextFunction) {
     const { page = 1, pageSize = 10 } = req.query;
 
     OrderService.getOrdersByUserId(+page, +pageSize, Number(req.params.id))
@@ -80,7 +69,7 @@ class OrderRouter extends Configuration {
       .catch((err) => next(err));
   }
 
-  private handleGetOrders(req: Request, res: Response, next: NextFunction) {
+  private getOrders(req: Request, res: Response, next: NextFunction) {
     const { page = 1, pageSize = 10 } = req.query;
 
     OrderService.getOrders(+page, +pageSize)
@@ -88,13 +77,13 @@ class OrderRouter extends Configuration {
       .catch((err) => next(err));
   }
 
-  private handleGetOrderById(req: Request, res: Response, next: NextFunction) {
+  private getOrderById(req: Request, res: Response, next: NextFunction) {
     OrderService.getOrderById(Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleCreateOrder(req: Request, res: Response, next: NextFunction) {
+  private createOrder(req: Request, res: Response, next: NextFunction) {
     const userId = req.user?.id;
 
     const { products } = req.body;
@@ -104,13 +93,13 @@ class OrderRouter extends Configuration {
       .catch((err) => next(err));
   }
 
-  private handleUpdateOrder(req: Request, res: Response, next: NextFunction) {
+  private updateOrder(req: Request, res: Response, next: NextFunction) {
     OrderService.updateOrder(req.body, Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleDeleteOrder(req: Request, res: Response, next: NextFunction) {
+  private deleteOrder(req: Request, res: Response, next: NextFunction) {
     OrderService.deleteOrder(Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));

@@ -1,7 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import authTokenMiddleware from '../middlewares/auth-token.middleware';
 import authPermissionsMiddleware from '../middlewares/auth-permissions.middleware';
-import { ErrorMiddleware } from '../middlewares/error.middleware';
 import CategoryService from '../services/category.service';
 
 class CategoryRouter {
@@ -14,46 +13,35 @@ class CategoryRouter {
   }
 
   createRouters(): void {
-    this.router.get(
-      '/',
-      this.handleGetCategories.bind(this),
-      ErrorMiddleware.handleError
-    );
-    this.router.get(
-      '/:id',
-      this.handleGetCategoryById.bind(this),
-      ErrorMiddleware.handleError
-    );
+    this.router.get('/category/', this.getCategories.bind(this));
+    this.router.get('/category/:id', this.getCategoryById.bind(this));
     this.router.post(
-      '/',
+      '/category/',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleCreateCategory.bind(this),
-      ErrorMiddleware.handleError
+      this.createCategory.bind(this)
     );
     this.router.put(
-      '/:id',
+      '/category/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleUpdateCategory.bind(this),
-      ErrorMiddleware.handleError
+      this.updateCategory.bind(this)
     );
     this.router.delete(
-      '/:id',
+      '/category/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.handleDeleteCategory.bind(this),
-      ErrorMiddleware.handleError
+      this.deleteCategory.bind(this)
     );
   }
 
-  private handleGetCategories(req: Request, res: Response, next: NextFunction) {
+  private getCategories(req: Request, res: Response, next: NextFunction) {
     const { search } = req.body;
 
     CategoryService.getCategories(search)
@@ -61,21 +49,13 @@ class CategoryRouter {
       .catch((err) => next(err));
   }
 
-  private handleGetCategoryById(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  private getCategoryById(req: Request, res: Response, next: NextFunction) {
     CategoryService.getCategoryById(Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleCreateCategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  private createCategory(req: Request, res: Response, next: NextFunction) {
     const { name, description, icon } = req.body;
 
     const category = {
@@ -89,21 +69,13 @@ class CategoryRouter {
       .catch((err) => next(err));
   }
 
-  private handleUpdateCategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  private updateCategory(req: Request, res: Response, next: NextFunction) {
     CategoryService.updateCategory(req.body, Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private handleDeleteCategory(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  private deleteCategory(req: Request, res: Response, next: NextFunction) {
     CategoryService.deleteCategory(Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
