@@ -8,7 +8,7 @@ import cookieParser from 'cookie-parser';
 import { Passport } from './config/passport/passport';
 import indexRouter from './routers/index.router';
 import { ErrorMiddleware } from './middlewares/error.middleware';
-
+import session from 'express-session';
 class Main extends Configuration {
   public app: express.Application;
   private HTTP_PORT: number = this.getNumberEnviroment('HTTP_PORT');
@@ -23,6 +23,16 @@ class Main extends Configuration {
     this.app.use(cookieParser(this.SECRET_KEY));
     this.app.use(morgan('dev'));
     this.app.use(ErrorMiddleware.handleError);
+    this.app.use(
+      session({
+        secret: this.SECRET_KEY,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+          maxAge: 1000 * 60 * 60 * 24,
+        },
+      })
+    );
 
     this.corsConfig();
     this.app.use(indexRouter);
