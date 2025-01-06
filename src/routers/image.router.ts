@@ -13,22 +13,8 @@ class ImageRouter {
   }
 
   createRouters(): void {
-    this.router.get(
-      '/image/',
-      authTokenMiddleware.authToken.bind(authTokenMiddleware),
-      authPermissionsMiddleware
-        .authPermissions(['admin'])
-        .bind(authPermissionsMiddleware),
-      this.getImages.bind(this)
-    );
-    this.router.get(
-      '/image/:id',
-      authTokenMiddleware.authToken.bind(authTokenMiddleware),
-      authPermissionsMiddleware
-        .authPermissions(['admin'])
-        .bind(authPermissionsMiddleware),
-      this.getImagesByProductId.bind(this)
-    );
+    this.router.get('/image/', this.getImages.bind(this));
+    this.router.get('/image/:id', this.getImagesByProductId.bind(this));
     this.router.post(
       '/image/',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
