@@ -9,14 +9,21 @@ import { Passport } from './config/passport/passport';
 import indexRouter from './routers/index.router';
 import { ErrorMiddleware } from './middlewares/error.middleware';
 import session from 'express-session';
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
+import swaggerUi, { JsonObject } from 'swagger-ui-express';
+
 class Main extends Configuration {
   public app: express.Application;
   private HTTP_PORT: number = this.getNumberEnviroment('HTTP_PORT');
   private API_URL: string = this.getEnviroment('API_URL')!;
   private SECRET_KEY: string = this.getEnviroment('SECRET_KEY')!;
-
+  private swaggerDoc;
   constructor() {
     super();
+    this.swaggerDoc = yaml.load(
+      fs.readFileSync('./src/config/docs/swagger-documentation.yml', 'utf8')
+    ) as JsonObject;
     this.app = express();
 
     this.app.use(express.json());
@@ -32,6 +39,11 @@ class Main extends Configuration {
           maxAge: 1000 * 60 * 60 * 24,
         },
       })
+    );
+    this.app.use(
+      '/documentation',
+      swaggerUi.serve,
+      swaggerUi.setup(this.swaggerDoc)
     );
 
     this.corsConfig();
