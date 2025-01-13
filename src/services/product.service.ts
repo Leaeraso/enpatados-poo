@@ -151,8 +151,15 @@ class ProductService {
     if (!product) {
       throw new NotFoundError('Product not found');
     }
-
-    await product.update(updatedData);
+    const data = {
+      name: updatedData.name,
+      description: updatedData.description,
+      price: updatedData.price,
+      stock: updatedData.stock,
+      categoryId: updatedData.categoryId,
+      subcategory_id: updatedData.subcategoryId
+    }
+    await product.update(data);
 
     return product;
   }
