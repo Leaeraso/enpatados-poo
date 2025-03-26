@@ -21,10 +21,6 @@ class OrderProductModel extends Model<
         order_id: {
           type: DataTypes.INTEGER,
           allowNull: false,
-          references: {
-            model: 'orders',
-            key: 'order_number',
-          },
         },
         product_id: {
           type: DataTypes.INTEGER,

@@ -1,0 +1,1001 @@
+openapi: 3.0.3
+info:
+  title: Documentación API Enpatados
+  description: |-
+    Esta es la documentación de la API de Enpatados, un emprendimiento que vende indumentaria, hecho con NodeJS utilizando Express, Sequeilize como ORM de MySQL y TypeScript, entre otras tecnologias, siguiendo el paradigma POO, buenas practicas y una nomeclatura. Para ver a detalle la API mirar en el repositorio: [https://github.com/Leaeraso/enpatados-poo](https://github.com/Leaeraso/enpatados-poo).
+  version: 1.0.0
+paths:
+  /user/auth/token:
+    get:
+      tags:
+        - Users
+      summary: Verify user session
+      responses:
+        200:
+          description: Return req.user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        401:
+          description: Error verifying the session
+      security:
+        - bearerAuth: []
+  /user/auth/google:
+    get:
+      tags:
+        - Users
+      summary: Authenticate with Google
+      responses:
+        200:
+          description: Invoque google's callback to return to the user
+        500:
+          description: Internal server error
+  /user/auth/google/callback:
+    get:
+      tags:
+        - Users
+      summary: Callback function which authenticate the user
+      responses:
+        200:
+          description: Return the token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserToken"
+        401:
+          description: Error trying to login with Google
+  /user/:
+    get:
+      tags:
+        - Users
+      summary: Get users
+      responses:
+        200:
+          description: Return an user array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        404:
+          description: Users not found
+        500:
+          description: Internal server error
+  /user/pass/recovery:
+    post:
+      tags:
+        - Users
+      summary: Password recovery mail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPasswordRecovery'
+      responses:
+        200:
+          description: Email sent successfully
+        500:
+          description: Internal server error
+  /user/register:
+    post:
+      tags:
+        - Users
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegister'
+      responses:
+        200:
+          description: Return the token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserToken"
+        400:
+          description: User already registered
+        500:
+          description: Internal server error
+  /user/login:
+    post:
+      tags:
+        - Users
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        200:
+          description: Return the token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserToken"
+        404:
+          description: User not found
+        400:
+          description: Invalid password
+        500:
+          description: Internal server error
+  /user/reset/{token}:
+    patch:
+      tags:
+        - Users
+      summary: Change password
+      parameters:
+        - $ref: "#/parameters/token"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResetPassword'
+      responses:
+        200: 
+          description: Password updated successfully
+        400:
+          description: Invalid or expired token
+        404: 
+          description: User not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+  /user/{id}:
+    put:
+      tags:
+        - Users
+      summary: Update user
+      parameters:
+        - $ref: "#/parameters/id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        200: 
+          description: Return the new user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        404:
+          description: User not found
+        401:
+          description: You are not allowed to change the user role
+      security:
+        - bearerAuth: []
+  /product/:
+    get:
+      tags:
+        - Products
+      summary: Get products
+      parameters:
+        - $ref: "#/parameters/search"
+        - $ref: "#/parameters/page"
+        - $ref: "#/parameters/page_size"
+      responses:
+        200:
+          description: Return a product array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+        404:
+          description: Products not found
+        500:
+          description: Internal server error
+    post:
+      tags:
+        - Products
+      summary: Create product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreate'
+      responses:
+        200: 
+          description: Product created successfully
+        400:
+          description: Product already exists
+        404:
+          description: Category/Subcategory not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+  /product/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get product
+      parameters:
+        - $ref: "#/parameters/id"
+      responses:
+        200: 
+         description: Return the product
+         content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Product"
+        404:
+          description: Product not found
+        500:
+          description: Internal server error
+    put:
+      tags:
+        - Products
+      summary: Update product
+      parameters:
+        - $ref: "#/parameters/id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdate'
+      responses:
+        200:
+          description: Return the new product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        404:
+          description: Product not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Products
+      summary: Delete product
+      parameters:
+        - $ref: "#/parameters/id"
+      responses:
+        200:
+          description: Product deleted successfully
+        404:
+          description: Product not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+  /category/:
+    get:
+      tags:
+        - Categories
+      summary: Get categories
+      responses:
+        200:
+          description: Return a category array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+        404:
+          description: Categories not found
+        500:
+          description: Internal server error
+    post:
+      tags:
+        - Categories
+      summary: Create category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
+      responses:
+        200:
+          description: Category created successfully
+        400:
+          description: Category already exists
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+  /category/{id}:
+    get:
+      tags:
+        - Categories
+      summary: Get category
+      parameters:
+        - $ref: "#/parameters/id"
+      responses:
+        200:
+          description: Return the category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        404:
+          description: Category not found
+        500:
+          description: Internal server error
+    put:
+      tags:
+        - Categories
+      summary: Update category
+      parameters:
+        - $ref: "#/parameters/id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdate'
+      responses:
+        200:
+          description: Return the new category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        404:
+          description: Category not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Categories
+      summary: Delete category
+      parameters:
+        - $ref: "#/parameters/id"
+      responses:
+        200:
+          description: Category deleted successfully
+        404:
+          description: Category not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+  /subcategory/:
+    get:
+      tags:
+        - Subcategories
+      summary: Get subcategories
+      responses:
+        200:
+          description: Return a subcategory array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subcategory"
+        404:
+          description: Subcategories not found
+        500:
+          description: Internal server error
+    post:
+      tags:
+        - Subcategories
+      summary: Create subcategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubcategoryCreate"
+      responses:
+        200:
+          description: Subcategory created successfully
+        400:
+          description: Subcategory already exists
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+  /subcategory/{id}:
+    get:
+      tags:
+        - Subcategories
+      summary: Get subcategory
+      parameters:
+        - $ref: "#/parameters/id"
+      responses:
+        200:
+          description: Return the subcategory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subcategory"
+        404:
+          description: Subcategory not found
+        500:
+          description: Internal server error
+    put:
+      tags:
+        - Subcategories
+      summary: Update subcategory
+      parameters:
+        - $ref: "#/parameters/id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubcategoryUpdate'
+      responses:
+        200:
+          description: Return the new subcategory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subcategory"
+        404:
+          description: Subcategory not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Subcategories
+      summary: Delete subcategory
+      parameters:
+        - $ref: "#/parameters/id"
+      responses:
+        200:
+          description: Subcategory deleted successfully
+        404:
+          description: Subcategory not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+  /image/:
+    get:
+      tags:
+        - Images
+      summary: Get images
+      responses:
+        200:
+          description: Return an Image array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Image"
+        404:
+          description: Images not found
+        500:
+          description: Internal server error
+    post:
+      tags:
+        - Images
+      summary: Create image
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImageCreate'
+      responses:
+        200:
+          description: Image created successfully
+        400:
+          description: Image already exists
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+  /image/{id}:
+    get:
+      tags:
+        - Images
+      summary: Get image
+      parameters:
+        - $ref: "#/parameters/id"
+      responses:
+        200:
+          description: Return an image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Image"
+        404:
+          description: Image not found
+        500:
+          description: Internal server error
+    put:
+      tags:
+        - Images
+      summary: Update image
+      parameters:
+        - $ref: "#/parameters/id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImageUpdate'
+      responses:
+        200:
+          description: Return the new image
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Image"
+        404:
+          description: Image not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Images
+      summary: Delete image
+      parameters:
+        - $ref: "#/parameters/id"
+      responses:
+        200:
+          description: Image deleted successfully
+        404:
+          description: Image not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+  /order/:
+    get:
+      tags:
+        - Orders
+      summary: Get orders
+      parameters:
+        - $ref: "#/parameters/page"
+        - $ref: "#/parameters/page_size"
+        - $ref: "#/parameters/search"
+      responses:
+        200:
+          description: Orders array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+        404:
+          description: Orders not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+    post:
+      tags:
+        - Orders
+      summary: Create order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderCreate"
+      responses:
+        200:
+          description: Return wpp link
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderMsg"
+        400: 
+          description: There is not products in the shipping cart
+        404:
+          description: Product not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+  /order/user/{id}:
+    get:
+      tags:
+        - Orders
+      summary: Get orders by user
+      parameters:
+        - $ref: "#/parameters/id"
+        - $ref: "#/parameters/page"
+        - $ref: "#/parameters/page_size"
+      responses:
+        200:
+          description: Orders array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+        404:
+          description: Orders not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+  /order/{id}:
+    get:
+      tags:
+        - Orders
+      summary: Get order
+      parameters:
+        - $ref: "#/parameters/id"
+      responses:
+        200:
+          description: Return the order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        404:
+          description: Order not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+    put:
+      tags:
+        - Orders
+      summary: Update order
+      parameters:
+        - $ref: "#/parameters/id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderUpdate"
+      responses:
+        200:
+          description: Return the new order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        404:
+          description: Order/Products not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+    delete:
+      tags:
+        - Orders
+      summary: Delete order
+      parameters:
+        - $ref: "#/parameters/id"
+      responses:
+        200:
+          description: Order deleted successfully
+        404:
+          description: Order/Products not found
+        500:
+          description: Internal server error
+      security:
+        - bearerAuth: []
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        order_number:
+          type: integer
+        date:
+          type: string
+        total:
+          type: integer
+        user_id:
+          type: integer
+        discount:
+          type: integer
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              product_id:
+                type: integer
+              quantity:
+                type: integer
+    OrderCreate:
+      type: object
+      properties:
+        date:
+          type: string
+        total:
+          type: integer
+        user_id:
+          type: integer
+        discount:
+          type: integer
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              product_id:
+                type: integer
+              quantity:
+                type: integer
+    OrderUpdate:
+      type: object
+      properties:
+        date:
+          type: string
+        total:
+          type: integer
+        user_id:
+          type: integer
+        discount:
+          type: integer
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              product_id:
+                type: integer
+              quantity:
+                type: integer
+    OrderMsg:
+      type: object
+      properties:
+        message:
+          type: string
+    ProductCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+        stock:
+          type: integer
+        category_id:
+          type: integer
+        subcategory_id:
+          type: integer
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+        stock:
+          type: integer
+        category_id:
+          type: integer
+        subcategory_id:
+          type: integer
+    Product:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+        stock:
+          type: integer
+        category_id:
+          type: integer
+        subcategory_id:
+          type: integer
+    SubcategoryCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        category_id:
+          type: integer
+    SubcategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        category_id:
+          type: integer
+    Subcategory:
+      type: object
+      properties:
+        subcategory_id:
+          type: integer
+        name:
+          type: string
+        category_id:
+          type: integer
+    UserRegister:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        date_of_birth:
+          type: string
+          format: Date
+    UserLogin:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    User:
+      type: object
+      properties:
+        user_id:
+          type: number
+        name:
+          type: string
+        surname:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        date_of_birth:
+          type: string
+          format: Date
+        role:
+          type: string
+          enum:
+            - Customer
+            - Admin
+    UserToken:
+      type: object
+      properties:
+        token:
+          type: string
+    UserPasswordRecovery:
+      type: object
+      properties:
+        email:
+          type: string
+    UserResetPassword:
+      type: object
+      properties:
+        password: 
+          type: string
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        date_of_birth:
+          type: string
+          format: Date
+        role:
+          type: string
+          enum:
+            - Customer
+            - Admin
+    CategoryCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+    CategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+    Category:
+      type: object
+      properties:
+        category_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+    Image:
+      type: object
+      properties:
+        image_id:
+          type: integer
+        url:
+          type: string
+        product_id:
+          type: integer
+    ImageCreate:
+      type: object
+      properties:
+        url:
+          type: string
+        product_id:
+          type: integer
+    ImageUpdate:
+      type: object
+      properties:
+        url:
+          type: string
+        product_id:
+          type: integer
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+parameters:
+  id:
+    name: id
+    in: path
+    required: true
+    schema:
+      type: string
+  token:
+    name: token
+    in: path
+    required: true
+    schema:
+      type: string
+  page:
+    name: page
+    in: query
+    description: Page number
+    schema:
+      type: number
+      example: 1
+  page_size:
+    name: page_size
+    in: query
+    description: Page size
+    schema:
+      type: number
+      example: 10
+  search:
+    name: search
+    in: query
+    description: Search
+    schema:
+      type: string

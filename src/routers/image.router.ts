@@ -1,9 +1,9 @@
 import express, { NextFunction, Request, Response } from 'express';
-import SubcategoryService from '../services/subcategory.service';
 import authTokenMiddleware from '../middlewares/auth-token.middleware';
 import authPermissionsMiddleware from '../middlewares/auth-permissions.middleware';
+import ImageService from '../services/image.service';
 
-class SubcategoryRouter {
+class ImageRouter {
   public router: express.Router;
 
   constructor() {
@@ -13,71 +13,69 @@ class SubcategoryRouter {
   }
 
   createRouters(): void {
-    this.router.get('/subcategory/', this.getSubcategories.bind(this));
-    this.router.get('/subcategory/:id', this.getSubcategoryById.bind(this));
+    this.router.get('/image/', this.getImages.bind(this));
+    this.router.get('/image/:id', this.getImagesByProductId.bind(this));
     this.router.post(
-      '/subcategory/',
+      '/image/',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.createSubcategory.bind(this)
+      this.createImage.bind(this)
     );
     this.router.put(
-      '/subcategory/:id',
+      '/image/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.updateSubcategory.bind(this)
+      this.updateImage.bind(this)
     );
     this.router.delete(
-      '/subcategory/:id',
+      '/image/:id',
       authTokenMiddleware.authToken.bind(authTokenMiddleware),
       authPermissionsMiddleware
         .authPermissions(['admin'])
         .bind(authPermissionsMiddleware),
-      this.deleteSubcategory.bind(this)
+      this.deleteImage.bind(this)
     );
   }
 
-  private getSubcategories(req: Request, res: Response, next: NextFunction) {
-    const { search } = req.body;
-    SubcategoryService.getSubcategories(search)
+  private getImages(req: Request, res: Response, next: NextFunction) {
+    const { page = 1, pageSize = 10 } = req.query;
+
+    ImageService.getImages(+page, +pageSize)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private getSubcategoryById(req: Request, res: Response, next: NextFunction) {
-    SubcategoryService.getSubcategoryById(Number(req.params.id))
+  private getImagesByProductId(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    ImageService.getImagesByProductId(Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private createSubcategory(req: Request, res: Response, next: NextFunction) {
-    const { name, categoryId } = req.body;
-
-    const subcategory = {
-      name,
-      categoryId,
-    };
-
-    SubcategoryService.createSubcategory(subcategory)
+  private createImage(req: Request, res: Response, next: NextFunction) {
+    ImageService.createImage(req.body)
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private updateSubcategory(req: Request, res: Response, next: NextFunction) {
-    SubcategoryService.updateSubcategory(req.body, Number(req.params.id))
+  private updateImage(req: Request, res: Response, next: NextFunction) {
+    ImageService.updateImage(req.body, Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 
-  private deleteSubcategory(req: Request, res: Response, next: NextFunction) {
-    SubcategoryService.deleteSubcategory(Number(req.params.id))
+  private deleteImage(req: Request, res: Response, next: NextFunction) {
+    ImageService.deleteImage(Number(req.params.id))
       .then((result) => res.json(result))
       .catch((err) => next(err));
   }
 }
 
-export default new SubcategoryRouter().router;
+export default new ImageRouter().router;

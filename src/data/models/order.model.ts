@@ -41,9 +41,9 @@ class OrderModel extends Model<
           allowNull: false,
         },
         status: {
-          type: DataTypes.ENUM('pendiente', 'pagado', 'cancelado'),
+          type: DataTypes.ENUM('pending', 'paid', 'canceled'),
           allowNull: false,
-          defaultValue: 'pendiente',
+          defaultValue: 'pending',
         },
         user_id: {
           type: DataTypes.INTEGER,
