@@ -1,27 +1,26 @@
-# Usamos la imagen base node:22-alpine
+# Imagen base liviana con Node 22
 FROM node:22-alpine
 
-# Creamos y establecemos el directorio de trabajo en el contenedor
+# Directorio de trabajo
 WORKDIR /usr/src/app
 
-# Copiamos el package.json y el package-lock.json
-COPY package* ./
+# Copiamos solo los archivos de dependencias primero para aprovechar el cache
+COPY package*.json ./
 
-# Instala las dependencias de producción
+# Instalamos dependencias de producción
 RUN npm install --only=production
 
-# Copia el resto del código fuente al contenedor
+# Copiamos todo el resto del código (incluyendo src)
 COPY . .
 
-# Instalamos TypeScript globalmente si no está presente
-RUN npm install typescript --save-dev
+# Instalamos TypeScript solo para compilar
+RUN npm install --save-dev typescript
 
-# Compila el código TypeScript
+# Compilamos el proyecto TypeScript
 RUN npx tsc
 
-# Expone el puerto que utiliza tu API
+# Puerto en el que corre la API
 EXPOSE 3000
 
-# Comando para iniciar la aplicación en modo producción
-CMD ["npm" ,"start"]
-
+# Comando para ejecutar la API
+CMD ["node", "dist/main.js"]
