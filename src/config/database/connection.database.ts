@@ -14,7 +14,7 @@ export class Connection extends Configuration {
       this.getEnviroment('MYSQL_PASS')!,
       {
         host: this.getEnviroment('MYSQL_HOST'),
-        dialect: 'mysql',
+        dialect: 'postgres',
         port: this.getNumberEnviroment('MYSQL_PORT'),
         dialectOptions: {
           ssl: {
