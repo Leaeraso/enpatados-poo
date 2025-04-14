@@ -38,7 +38,7 @@ export class Connection extends Configuration {
       await this.sequelize.authenticate()
       console.log("Connection has been established successfully.")
 
-      await this.sequelize.sync({ force: true })
+      await this.sequelize.sync({ force: false })
     } catch (error) {
       console.error("Unable to connect to the database:", error)
     }
